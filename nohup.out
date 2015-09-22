@@ -1,0 +1,55 @@
+
+> hackerbuzz@0.0.0 start /home/ec2-user/hackerbuzz
+> node ./bin/www
+
+[0mGET /index.html?q=react,angular,ember [32m200 [0m6.394 ms - -[0m
+{ [error: password authentication failed for user "postgres"]
+  name: 'error',
+  length: 97,
+  severity: 'FATAL',
+  code: '28P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'auth.c',
+  line: '302',
+  routine: 'auth_failed' }
+[0mGET /index.html?q=react,angular,ember [32m200 [0m1.068 ms - -[0m
+[0mGET /api/trends?q=react,angular,ember [0m- [0m- ms - -[0m
+{ [error: password authentication failed for user "postgres"]
+  name: 'error',
+  length: 97,
+  severity: 'FATAL',
+  code: '28P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'auth.c',
+  line: '302',
+  routine: 'auth_failed' }
+
+> hackerbuzz@0.0.0 start /home/ec2-user/hackerbuzz
+> node ./bin/www
+
+[0mGET /index.html?q=react,angular,ember [32m200 [0m6.255 ms - -[0m
+[0mGET /api/trends?q=react,angular,ember [32m200 [0m63.224 ms - -[0m
+[0mGET /index.html?q=react,angular,ember [32m200 [0m1.091 ms - -[0m
+[0mGET /api/trends?q=react,angular,ember [32m200 [0m39.172 ms - -[0m
+[0mGET /api/rendered_stories?q=angular [32m200 [0m475.044 ms - -[0m
+[0mGET /api/rendered_stories?q=ember [32m200 [0m40.966 ms - -[0m

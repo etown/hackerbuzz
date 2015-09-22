@@ -1,0 +1,54 @@
+<html lang='en'>
+	<head>
+	    <title>Hackerbuzz</title>
+
+	    <link href='https://cdnjs.cloudflare.com/ajax/libs/metrics-graphics/2.6.0/metricsgraphics.min.css' rel='stylesheet' type='text/css'>
+	    <script src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+	    <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.0/d3.min.js' charset='utf-8'></script>
+	    <script src='https://cdnjs.cloudflare.com/ajax/libs/metrics-graphics/2.6.0/metricsgraphics.min.js'></script>
+	</head>
+
+	<body>
+	    <div id='chart'> </div>
+	    <div class='legend'> </div>
+	    <div id='links'> </div>
+	    <div id='posts'> </div>
+
+	    <script>
+	        var hash, queries;
+	        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+	        hash = hashes[0].split('=');
+	        queries = hash[1].split(',');
+
+	        function showPosts(term) {
+		        $.get('api/rendered_stories?q=' + term, function(data) {
+		            $('#posts').html(data);
+		        });
+	        }
+
+			MG.add_hook('line.after_init', function(args) {
+				for (var i = 0; i < queries.length; i++) {
+					var query = queries[i];
+				    $("#links").append('<div> <a href="javascript:showPosts(\''+query+'\')">Show ' + query + ' posts</a> </div>');
+				}
+	        });
+
+			d3.json('api/trends?'+hashes[0], function(data) {
+			    for (var i = 0; i < data.length; i++) {
+			        data[i] = MG.convert.date(data[i], 'date');
+			    }
+
+			    MG.data_graphic({
+			        title: "StoryPoints",
+			        animate_on_load: true,
+			        data: data,
+			        width: 600,
+			        height: 400,
+			        target: '#chart',
+			        legend: queries,
+			        legend_target: '.legend'
+			    });
+			});
+	    </script>
+	</body>
+</html>
