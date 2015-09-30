@@ -17,7 +17,7 @@ router.get('/api/trends', function(req, res, next) {
   var self=this;
   var promises=[];
   for (i = 0; i < queries.length; i++) {
-    promises.push(db.query("select distinct(to_char(created_at, 'YYYY-MM-DD')) as date,sum(points) over(order by created_at) as value from items where to_tsvector ('simple', title) @@ to_tsquery ($1) order by date", queries[i]));
+    promises.push(db.query("select distinct(to_char(created_at, 'YYYY-MM-DD')) as date,sum(points) over(order by created_at) as value from items where to_tsvector ('english', title) @@ to_tsquery ($1) order by date", queries[i]));
   }
   db.tx(function () {
     return this.batch(promises);
@@ -32,7 +32,7 @@ router.get('/api/stories', function(req, res, next) {
   var i;
   var self=this;
   var promises=[];
-  promises.push(db.query("select * from items where to_tsvector ('simple', title) @@ to_tsquery ($1) order by id desc", req.query.q));
+  promises.push(db.query("select * from items where to_tsvector ('english', title) @@ to_tsquery ($1) order by id desc", req.query.q));
   db.tx(function () {
     return this.batch(promises);
   }).then(function (values) {
@@ -46,7 +46,7 @@ router.get('/api/rendered_stories', function(req, res, next) {
   var i;
   var self=this;
   var promises=[];
-  promises.push(db.query("select * from items where to_tsvector ('simple', title) @@ to_tsquery ($1) order by id desc", req.query.q));
+  promises.push(db.query("select * from items where to_tsvector ('english', title) @@ to_tsquery ($1) order by id desc", req.query.q));
   db.tx(function () {
     return this.batch(promises);
   }).then(function (values) {
