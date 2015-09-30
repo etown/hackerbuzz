@@ -1,54 +1,438 @@
-<html lang='en'>
-	<head>
-	    <title>Hackerbuzz</title>
+<!DOCTYPE html>
+<title>hackerbuzz</title>
+<meta charset="utf-8">
+<style>
+  body {
+      font: 10px sans-serif;
+      margin: 10px;
+  }
+  footer {
+      float: right;
+      height: 35px;
+      margin: 0px 50px 0px 0px;
+      color: #000;
+      text-align: right;
+      padding: 10px 30px;
+  }
+  path.line {
+      fill: none;
+      stroke: #666;
+      stroke-width: 1.5px;
+  }
+  path.area {
+      fill: #e7e7e7;
+  }
+  .axis {
+      shape-rendering: crispEdges;
+  }
+  .x.axis line {
+      stroke: #fff;
+  }
+  .x.axis .minor {
+      stroke-opacity: .5;
+  }
+  .x.axis path {
+      display: none;
+  }
+  .y.axis line,
+  .y.axis path {
+      fill: none;
+      stroke: #000;
+  }
+  .legend rect {
+      fill: white;
+      stroke: black;
+      opacity: 0.8;
+  }
+  #graph {
+      width: 100%;
+      height: 400px;
+  }
+  #terms {
+      margin: 15px;
+  }
+  #form,
+  #posts {
+      margin-left: 15px;
+  }
+  .intro {
+      margin: 40px;
+  }
+  ul {
+      list-style-type: none;
+  }
+  .term {
+      cursor: pointer;
+      border-radius: 25px;
+      background: #8AC007;
+      margin: 5px;
+      padding: 10px;
+  }
+  .flexcontainer {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-flex-direction: row;
+      flex-direction: row;
+  }
+  .title {
+      font-size: 2em;
+  }
+  .word {
+      font-style: italic;
+      padding: 5px;
+  }
+  ul li a {
+      display: inline-block;
+      padding: 8px;
+  }
+  ul li a:link {
+      color: #3C3939;
+  }
+  ul li a:visited {
+      color: #3C3939;
+  }
+  body {
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 10pt;
+      color: #828282;
+  }
+  td {
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 10pt;
+      color: #828282;
+  }
+  input {
+      font-family: monospace;
+      font-size: 10pt;
+      color: #000000;
+  }
+  input[type=\"submit\"] {
+    font-family: Verdana, Geneva, sans-serif;
+  }
+  a:link {
+      color: #000000;
+      text-decoration: none;
+  }
+  a:visited {
+      color: #828282;
+      text-decoration: none;
+  }
+</style>
+<body>
+<div class=''>
+<div class='intro'>
+<div class='title'>hack·er buzz</div>
+<div class='phonetic'>/ˈhakərbəz/</div>
+<div class='word'>noun</div>
+<div>1. A simple approach to HN trend visualization showing cumulative points over time for posts with titles matching terms</div><br>
+What does it mean? Probably nothing significant, but it still can be interesting:
+<ul>
+  <li><a href="http://hackerbuzz.net/#react,ember">Rapid growth of react buzz</a></li>
+  <li><a href="http://hackerbuzz.net/#uber,slack,sidecar,hipchat">Unicorns and ponies</a></li>
+  <li><a href="http://hackerbuzz.net/#yui">Death, silence, then discontinuation notice</a></li>
+  <li><a href="http://hackerbuzz.net/#docker,openstacking">Never got traction</a></li>
+  </ul>
+</div>
 
-	    <link href='https://cdnjs.cloudflare.com/ajax/libs/metrics-graphics/2.6.0/metricsgraphics.min.css' rel='stylesheet' type='text/css'>
-	    <script src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-	    <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.0/d3.min.js' charset='utf-8'></script>
-	    <script src='https://cdnjs.cloudflare.com/ajax/libs/metrics-graphics/2.6.0/metricsgraphics.min.js'></script>
-	</head>
+<svg id="graph"></svg>
+</div>
+<div id='terms'></div>
+<form id='form' onsubmit='return addTerm(this);'>
+  <input type='text' name='term'>
+  <input type='submit' value='Add'>
+</form>
+<div id='posts'></div>
+<footer> 
+built by <a href="https://github.com/etown">etown</a> (ethan sutin)
+</footer>
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+<script>
 
-	<body>
-	    <div id='chart'> </div>
-	    <div class='legend'> </div>
-	    <div id='links'> </div>
-	    <div id='posts'> </div>
+  (function() {
+      d3.legend = function(g) {
+          g.each(function() {
+              var g = d3.select(this),
+                  items = {},
+                  svg = d3.select(g.property(
+                      "nearestViewportElement")),
+                  legendPadding = g.attr("data-style-padding") ||
+                  50,
+                  lb = g.selectAll(".legend-box").data([true]),
+                  li = g.selectAll(".legend-items").data([true])
 
-	    <script>
-	        var hash, queries;
-	        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-	        hash = hashes[0].split('=');
-	        queries = hash[1].split(',');
+              lb.enter().append("rect").classed("legend-box",
+                  true)
+              li.enter().append("g").classed("legend-items",
+                  true)
 
-	        function showPosts(term) {
-		        $.get('api/rendered_stories?q=' + term, function(data) {
-		            $('#posts').html(data);
-		        });
-	        }
+              svg.selectAll("[data-legend]").each(function() {
+                  var self = d3.select(this)
+                  items[self.attr("data-legend")] = {
+                      pos: self.attr(
+                              "data-legend-pos") ||
+                          this.getBBox().y,
+                      color: self.attr(
+                              "data-legend-color") !=
+                          undefined ? self.attr(
+                              "data-legend-color") : self
+                          .style("fill") != 'none' ?
+                          self.style("fill") : self
+                          .style("stroke")
+                  }
+              })
 
-			MG.add_hook('line.after_init', function(args) {
-				for (var i = 0; i < queries.length; i++) {
-					var query = queries[i];
-				    $("#links").append('<div> <a href="javascript:showPosts(\''+query+'\')">Show ' + query + ' posts</a> </div>');
-				}
-	        });
+              items = d3.entries(items).sort(function(a, b) {
+                  return a.value.pos - b.value.pos
+              })
 
-			d3.json('api/trends?'+hashes[0], function(data) {
-			    for (var i = 0; i < data.length; i++) {
-			        data[i] = MG.convert.date(data[i], 'date');
-			    }
+              var offset = 0;
+              li.selectAll("text")
+                  .data(items, function(d) {
+                      return d.key
+                  })
+                  .call(function(d) {
+                      d.enter().append("text")
+                  })
+                  .call(function(d) {
+                      d.exit().remove()
+                  })
+                  .attr("y", function(d, i) {
+                      offset++;
+                      return i + "em"
+                  })
+                  .attr("x", "1em").style("cursor", "pointer")
+                  .style("font-size", "24px")
+                  .text(function(d) {;
+                      return d.key
+                  })
+                  .on("click", function(d, i) {
+                      showPosts(d.key);
+                  })
 
-			    MG.data_graphic({
-			        title: "StoryPoints",
-			        animate_on_load: true,
-			        data: data,
-			        width: 600,
-			        height: 400,
-			        target: '#chart',
-			        legend: queries,
-			        legend_target: '.legend'
-			    });
-			});
-	    </script>
-	</body>
-</html>
+              li.selectAll("circle")
+                  .data(items, function(d) {
+                      return d.key
+                  })
+                  .call(function(d) {
+                      d.enter().append("circle")
+                  })
+                  .call(function(d) {
+                      d.exit().remove()
+                  })
+                  .attr("cy", function(d, i) {
+                      return i - 0.25 + "em"
+                  })
+                  .attr("cx", 0)
+                  .attr("r", "0.4em").style("font-size", "24px")
+                  .attr("x", "1em").style("cursor", "pointer")
+                  .style("fill", function(d) {
+                      console.log(d.value.color);
+                      return d.value.color
+                  })
+                  .on("click", function(d, i) {
+                      showPosts(d.key);
+                  })
+
+              lb.enter().append("text").text(
+                      "(click on term to show posts)").attr("y", (
+                      offset * 2.19) + "em")
+                  .attr("x", "-1em")
+          })
+          return g
+      }
+  })();
+
+  var queries;
+
+  function render() {
+
+      $('#graph').empty();
+
+      var margin = 60;
+      var width = parseInt(d3.select("#graph").style("width")) - margin * 2,
+          height = parseInt(d3.select("#graph").style("height")) - margin * 2;
+
+      var parse = d3.time.format("%Y-%m-%d").parse;
+
+      // Scales and axes. Note the inverted domain for the y-scale: bigger is up!
+      var x = d3.time.scale().range([0, width]),
+          y = d3.scale.linear().range([height, 0]),
+          xAxis = d3.svg.axis().scale(x).tickSize(-height).tickSubdivide(true),
+          yAxis = d3.svg.axis().scale(y).ticks(4).orient("right");
+
+      // An area generator, for the light fill.
+      var area = d3.svg.area()
+          .interpolate("monotone")
+          .x(function(d) {
+              return x(d.date);
+          })
+          .y0(height)
+          .y1(function(d) {
+              return y(d.value);
+          });
+
+      // A line generator, for the dark stroke.
+      var line = d3.svg.line()
+          .interpolate("monotone")
+          .x(function(d) {
+              return x(d.date);
+          })
+          .y(function(d) {
+              return y(d.value);
+          });
+
+      d3.json("api/trends?q=" + queries.join(','), function(error, data) {
+          var xminimum, xmaximum, yminimum, ymaximum;
+          for (j = 0; j < data.length; j++) {
+              for (i = 0; i < data[j].length; i++) {
+                  data[j][i].date = parse(data[j][i].date);
+                  data[j][i].value = +data[j][i].value;
+              }
+              if (xminimum === undefined || xminimum > data[j][0].date) {
+                  xminimum = data[j][0].date;
+              }
+              if (xmaximum === undefined || xmaximum < data[j][data[j].length -
+                      1
+                  ].date) {
+                  xmaximum = data[j][data[j].length - 1].date;
+              }
+              if (yminimum === undefined || yminimum > data[j][0].value) {
+                  yminimum = data[j][0].value;
+              }
+              if (ymaximum === undefined || ymaximum < data[j][data[j].length -
+                      1
+                  ].value) {
+                  ymaximum = data[j][data[j].length - 1].value;
+              }
+              data[j].name = queries[j];
+          }
+          // Compute the minimum and maximum date, and the maximum.
+          x.domain([xminimum, xmaximum]);
+          y.domain([yminimum, ymaximum]).nice();
+
+          // Add an SVG element with the desired dimensions and margin.
+          var svg = d3.select("svg")
+              .attr("width", width)
+              .attr("height", height)
+              .append("g")
+              .attr("transform", "translate(" + margin + "," + margin +
+                  ")")
+
+          // Add the clip path.
+          svg.append("clipPath")
+              .attr("id", "clip")
+              .append("rect")
+              .attr("width", width)
+              .attr("height", height);
+
+          // Add the x-axis.
+          svg.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(xAxis);
+
+          // Add the y-axis.
+          svg.append("g")
+              .attr("class", "y axis")
+              .attr("transform", "translate(" + width+  ",0)")
+              .call(yAxis);
+
+
+          var colors = d3.scale.category10();
+          svg.selectAll('.line')
+              .data(data)
+              .enter()
+              .append('path')
+              .attr('class', 'line')
+              .style('stroke', function(d) {
+                  return colors(Math.random() * 50);
+              })
+              .attr('clip-path', 'url(#clip)')
+              .attr("data-legend", function(d) {
+                  return d.name
+              })
+              .attr('d', function(d) {
+                  return line(d);
+              })
+
+          /* Add 'curtain' rectangle to hide entire graph */
+          var curtain = svg.append('rect')
+              .attr('x', -1 * width)
+              .attr('y', -1 * height)
+              .attr('height', height)
+              .attr('width', width)
+              .attr('class', 'curtain')
+              .attr('transform', 'rotate(180)')
+              .style('fill', '#ffffff')
+
+          /* Create a shared transition for anything we're animating */
+          var t = svg.transition()
+              .delay(0)
+              .duration(500)
+              .ease('linear')
+              .each('end', function() {
+                  d3.select('line.guide')
+                      .transition()
+                      .style('opacity', 0)
+                      .remove()
+              });
+
+          t.select('rect.curtain')
+              .attr('width', 0);
+          t.select('line.guide')
+              .attr('transform', 'translate(' + width + ', 0)')
+
+          legend = d3.select("svg").append("g")
+              .attr("class", "legend")
+              .attr("transform", "translate(80,80)")
+              .call(d3.legend)
+
+      });
+
+      var i, terms = '';
+      $('#terms').empty();
+      $('#posts').empty();
+      for (i = 0; i < queries.length; i++) {
+      terms += '<span class="term" onclick="javascript:showPosts(\'' + queries[i] +
+              '\')">' + queries[i] +
+              ' <a href="javascript:;" onclick="removeTerm(' + i +
+              ')">x</a></span>';
+      }
+      $('#terms').append(terms);
+      window.location.hash = queries.join(',');
+  }
+
+  function showPosts(term) {
+      $.get('api/rendered_stories?q=' + term, function(data) {
+          $('#posts').html(data);
+      });
+  }
+
+  function addTerm(addForm) {
+    queries.push(addForm.term.value);
+    window.location.hash = queries.join(',');
+    addForm.term.value = '';
+    return false;
+  }
+
+  function removeTerm(i) {
+    queries.splice(i, 1);
+    window.location.hash = queries.join(',');
+    event.stopPropagation();
+  }
+
+  $(window).on('hashchange', function() {
+    queries = window.location.hash.slice(1).length > 0 ? window.location.hash.slice(1).split(',') : [];
+    render();
+  }).trigger('hashchange');
+
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-67990312-1', 'auto');
+  ga('send', 'pageview');
+</script>
