@@ -2,7 +2,7 @@
 
 ### Installation
 
-To install and run the app, just run the following commands
+To install and run the app, run the following commands
 
 ```
 npm install

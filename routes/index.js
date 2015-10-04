@@ -10,7 +10,7 @@ var cn = {
   'port': 5432
 };
 
-var db = pgp(cn); 
+var db = pgp(cn);
 router.get('/api/trends', function(req, res, next) {
   var queries=req.query.q.split(',');
   var i;

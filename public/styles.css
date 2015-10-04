@@ -1,6 +1,9 @@
 body {
     font: 10px sans-serif;
     margin: 10px;
+    font-family: 'San Francisco', 'Helvetica Neue', Helvetica, sans-serif;
+    font-size: 10pt;
+    color: #828282;
 }
 footer {
     float: right;
@@ -80,18 +83,13 @@ ul {
 }
 ul li a {
     display: inline-block;
-    padding: 8px;
+    padding: 10px 0 0;
 }
 ul li a:link {
     color: #3C3939;
 }
 ul li a:visited {
     color: #3C3939;
-}
-body {
-    font-family: Verdana, Geneva, sans-serif;
-    font-size: 10pt;
-    color: #828282;
 }
 td {
     font-family: Verdana, Geneva, sans-serif;
@@ -109,8 +107,18 @@ input[type=\"submit\"] {
 a:link {
     color: #000000;
     text-decoration: none;
+    background-image: -webkit-linear-gradient(top, rgba(0,0,0,0) 50%, rgba(0,0,0,0.6) 50%);
+    background-image: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.6) 50%);
+    background-repeat: repeat-x;
+    background-size: 2px 2px;
+    background-position: 0 23px;
 }
 a:visited {
     color: #828282;
     text-decoration: none;
+}
+.example-heading {
+  font-size: 20px;
+  text-transform: uppercase;
+  font-weight: 100;
 }
